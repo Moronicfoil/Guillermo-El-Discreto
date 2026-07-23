@@ -1,7 +1,7 @@
-../Core/Src/main.c:99:5:main	8
-../Core/Src/main.c:249:6:SystemClock_Config	3
-../Core/Src/main.c:294:13:MX_NVIC_Init	1
-../Core/Src/main.c:302:5:uart2_write	2
-../Core/Src/main.c:309:5:__io_putchar	1
-../Core/Src/main.c:315:6:HAL_TIM_PeriodElapsedCallback	2
-../Core/Src/main.c:330:6:Error_Handler	1
+../Core/Src/main.c:98:5:main	9
+../Core/Src/main.c:255:6:SystemClock_Config	3
+../Core/Src/main.c:300:13:MX_NVIC_Init	1
+../Core/Src/main.c:308:5:uart2_write	2
+../Core/Src/main.c:315:5:__io_putchar	1
+../Core/Src/main.c:321:6:HAL_TIM_PeriodElapsedCallback	2
+../Core/Src/main.c:336:6:Error_Handler	1

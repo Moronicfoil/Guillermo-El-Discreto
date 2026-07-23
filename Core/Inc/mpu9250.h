@@ -13,7 +13,10 @@
 
 
 typedef struct {
-    I2C_HandleTypeDef *i2cHandle;
+
+	SPI_HandleTypeDef *spiHandle;
+	GPIO_TypeDef *csPort;
+	uint16_t csPin;
 
     int16_t gyro_raw_data[3];
     int16_t accel_raw_data[3];
@@ -70,11 +73,13 @@ HAL_StatusTypeDef MPU9250_ReadRegisters(MPU9250* dev, uint8_t reg, uint8_t* data
 
 HAL_StatusTypeDef MPU9250_WriteRegister(MPU9250* dev, uint8_t reg, uint8_t data);
 
+
+
 /*
  * Functions High Level
  */
 
-HAL_StatusTypeDef MPU9250_Init(MPU9250* dev, I2C_HandleTypeDef* hic2);
+HAL_StatusTypeDef MPU9250_Init(MPU9250* dev, SPI_HandleTypeDef* hspi, GPIO_TypeDef* csPort, uint16_t csPin);
 
 HAL_StatusTypeDef MPU9250_Read_RawData(MPU9250* dev);
 

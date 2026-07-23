@@ -18,7 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "i2c.h"
+#include "spi.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
@@ -28,7 +28,6 @@
 #include "stdio.h"
 #include "math.h"
 #include "mpu9250.h"
-#include "scannerI2C.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -38,10 +37,10 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define KP 0.975f
-#define TI 45.0f
-#define TD 0.000065
-#define T0 0.001f
+#define KP 3.185f			// las mas chingonas 3.185 k y 0.012 de TD y 1000 TI
+#define TI 900.0f			//5.0f
+#define TD 0.012
+#define T0 0.005f
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -122,9 +121,10 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART2_UART_Init();
-  MX_I2C2_Init();
   MX_TIM2_Init();
   MX_TIM3_Init();
+  MX_TIM4_Init();
+  MX_SPI2_Init();
 
   /* Initialize interrupts */
   MX_NVIC_Init();
@@ -134,12 +134,17 @@ int main(void)
 
   printf("hola");
 
-  I2C_Scan(&hi2c2);
-
-  HAL_Delay(500);
+  //I2C_Scan(&hi2c2);
 
   //	Iniciamos el sensr
-  MPU9250_Init(&imu, &hi2c2);
+  //MPU9250_Init(&imu, &hi2c2);
+
+  //MPU9250_Calibrate(&imu, 1000);
+
+  if(MPU9250_Init(&imu, &hspi2, MPU_CS_GPIO_Port, MPU_CS_Pin) != HAL_OK)
+  {
+      while(1) { HAL_GPIO_TogglePin(GPIOA, LD2_Pin); HAL_Delay(100); }
+  }
 
   MPU9250_Calibrate(&imu, 1000);
 
@@ -159,13 +164,13 @@ int main(void)
 
 		if(MPU9250_GetData(&imu) == HAL_OK)
 		{
-			MPU9250_Update(&imu, 0.001f);
+			MPU9250_Update(&imu, 0.005f);
 		}
 		  /*
 		  * CONTROL PID POSICION
 		  */
 
-		 e0 = (-9.5) - imu.roll;
+		 e0 = (-7.10) - imu.roll;
 		 delta_u = (q0*e0)+(q1*e1)+(q2*e2);
 		 u += delta_u;
 
@@ -180,6 +185,7 @@ int main(void)
 		 {
 		  u = -10.4;
 		 }
+
 
 		 PWM = (fabs(u)/10.4)*1000.0;
 
@@ -227,7 +233,7 @@ int main(void)
 		 if(print_count == 10)
 		 {
 		   print_count = 0;
-		   printf("Pitch: %.2f\r\n U: %2f\r\n", (-9.5)-imu.roll, u);
+		   printf("Pitch: %.2f\r\n U: %.2f\r\n",(-7.10)- imu.roll, u);
 		  // printf("R1=%d R2=%d L1=%d L2=%d\r\n",R_patita_1, R_patita_2, L_patita_1, L_patita_2);
 
 		 }
