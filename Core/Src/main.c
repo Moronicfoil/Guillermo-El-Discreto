@@ -37,10 +37,19 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define KP 3.185f			// las mas chingonas 3.185 k y 0.012 de TD y 1000 TI
-#define TI 900.0f			//5.0f
-#define TD 0.012
-#define T0 0.005f
+#define KP 1.080f			// las mas chingonas 3.185 k y 0.012 de TD y 1000 TI  // otros mas buenos KP 3.185 T1 500.0 TD 0.016
+#define TI 1000.0f			//5.0f
+#define TD 0.0013f		// probar kp 1.5	// ultimos valores chidos 25 jul 3.183 KP, 100.0 KI, 0.011 TD
+#define T0 0.001f
+#define KPVEL 0.0012f
+#define TIVEL 1000.0f
+#define TDVEL 0.0f
+#define T0VEL 0.025f
+
+
+#define PPR 318.0f
+#define ALPHA_MOTORS 0.1666f
+#define ENCODERMOD 4.0f
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -61,20 +70,41 @@ volatile float e1 = 0.0f;
 volatile float e2 = 0.0f;
 volatile float u = 0.0f;
 volatile float delta_u = 0;
+
+
 volatile float PWM = 0;
-float u_temp = 0;
+volatile float u_temp = 0;
 
 
 const float q0 = KP*(1.0f + (T0/(2.0f*TI)) + (TD/T0));
 const float q1 = -KP*(1.0f - (T0/(2.0f*TI)) + (2.0f*TD/T0));
 const float q2 = (KP*TD)/T0;
 
-int L_patita_1 = 0;
-int L_patita_2 = 0;
 
-int R_patita_1 = 0;
-int R_patita_2 = 0;
+// VARIABLES PID VELOCIDAD
+volatile float e0_vel = 0.0f;
+volatile float e1_vel = 0.0f;
+volatile float e2_vel = 0.0f;
+volatile float u_vel = 0.0f;
+volatile float delta_u_vel = 0;
 
+const float q0_vel = KPVEL*(1.0f + (T0VEL/(2.0f*TIVEL)) + (TDVEL/T0VEL));
+const float q1_vel = -KPVEL*(1.0f - (T0VEL/(2.0f*TIVEL)) + (2.0f*TDVEL/T0VEL));
+const float q2_vel = (KPVEL*TDVEL)/T0VEL;
+
+
+volatile uint32_t encoderR_count[2] = {0, 0};
+volatile uint32_t encoderL_count[2] = {0, 0};
+
+volatile float motorL_Rev[2] = {0.0, 0.0};
+volatile float motorR_Rev[2] = {0.0, 0.0};
+
+volatile float motors_filter[2] = {0.0, 0.0};
+
+volatile float setpoint_vel = 0.0f;
+
+
+uint8_t print_count = 0;
 
 /* USER CODE END PV */
 
@@ -84,6 +114,7 @@ static void MX_NVIC_Init(void);
 /* USER CODE BEGIN PFP */
 int uart2_write(int ch);
 int __io_putchar(int ch);
+uint32_t Leer_Encoder(TIM_HandleTypeDef *htim);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -125,6 +156,8 @@ int main(void)
   MX_TIM3_Init();
   MX_TIM4_Init();
   MX_SPI2_Init();
+  MX_TIM5_Init();
+  MX_TIM9_Init();
 
   /* Initialize interrupts */
   MX_NVIC_Init();
@@ -148,8 +181,13 @@ int main(void)
 
   MPU9250_Calibrate(&imu, 1000);
 
-  HAL_TIM_Base_Start_IT(&htim2);
-  int print_count = 0;
+  HAL_TIM_Base_Start_IT(&htim4);
+  HAL_TIM_Base_Start_IT(&htim9);
+
+  HAL_TIM_Encoder_Start(&htim2, TIM_CHANNEL_ALL);
+  HAL_TIM_Encoder_Start(&htim5, TIM_CHANNEL_ALL);
+
+
 
 
   /* USER CODE END 2 */
@@ -158,88 +196,15 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  if(imu_sample_flag >= 5)
-	  {
-		print_count++;
-
-		if(MPU9250_GetData(&imu) == HAL_OK)
-		{
-			MPU9250_Update(&imu, 0.005f);
-		}
-		  /*
-		  * CONTROL PID POSICION
-		  */
-
-		 e0 = (-7.10) - imu.roll;
-		 delta_u = (q0*e0)+(q1*e1)+(q2*e2);
-		 u += delta_u;
-
-
-
-
-		 if(u >= 10.4)
-		 {
-		  u = 10.4;
-		 }
-		 if(u <= -10.4)
-		 {
-		  u = -10.4;
-		 }
-
-
-		 PWM = (fabs(u)/10.4)*1000.0;
-
-		 /*
-		 *  ASIGNACION DE PWM Y SENTIDO DE PINES
-		 */
-
-		 if(u >= 0.0)
-		 {
-			 L_patita_1 = 1;
-			 L_patita_2 = 0;
-
-			 R_patita_1 = 1;
-			 R_patita_2 = 0;
-
-		    HAL_GPIO_WritePin(GPIOA, R_Motor_Direction_2_Pin, R_patita_2);
-		    HAL_GPIO_WritePin(GPIOA, R_Motor_Direction_1_Pin, R_patita_1);
-
-		 	HAL_GPIO_WritePin(GPIOA, L_Motor_Direction_2_Pin, L_patita_2);
-		    HAL_GPIO_WritePin(GPIOA, L_Motor_Direction_1_Pin, L_patita_1);
-
-		 }
-		 if(u < 0.0){
-
-			 L_patita_1 = 0;
-			 L_patita_2 = 1;
-
-			 R_patita_1 = 0;
-			 R_patita_2 = 1;
-
-			 HAL_GPIO_WritePin(GPIOA, R_Motor_Direction_2_Pin, R_patita_2);
-			 HAL_GPIO_WritePin(GPIOA, R_Motor_Direction_1_Pin, R_patita_1);
-
-			 HAL_GPIO_WritePin(GPIOA, L_Motor_Direction_2_Pin, L_patita_2);
-			 HAL_GPIO_WritePin(GPIOA, L_Motor_Direction_1_Pin, L_patita_1);
-
-		 }
-
-		 e2 = e1;
-		 e1 = e0;
-
-		 __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, PWM);
-		 __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, PWM);
 
 		 if(print_count == 10)
 		 {
 		   print_count = 0;
-		   printf("Pitch: %.2f\r\n U: %.2f\r\n",(-7.10)- imu.roll, u);
+		   printf("Pitch: %.2f U: %.2f	MR: %.2f ML: %.2f\r\n" , (-4.60)-imu.roll, u,motors_filter[0], motors_filter[1] ); // antes - 7.10
 		  // printf("R1=%d R2=%d L1=%d L2=%d\r\n",R_patita_1, R_patita_2, L_patita_1, L_patita_2);
 
 		 }
-		 imu_sample_flag = 0;
 
-	  }
 
     /* USER CODE END WHILE */
 
@@ -299,9 +264,12 @@ void SystemClock_Config(void)
   */
 static void MX_NVIC_Init(void)
 {
-  /* TIM2_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(TIM2_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(TIM2_IRQn);
+  /* TIM4_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(TIM4_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(TIM4_IRQn);
+  /* TIM1_BRK_TIM9_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(TIM1_BRK_TIM9_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(TIM1_BRK_TIM9_IRQn);
 }
 
 /* USER CODE BEGIN 4 */
@@ -320,12 +288,110 @@ int __io_putchar(int ch)
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
 {
-	if(htim -> Instance == TIM2)
+	if(htim -> Instance == TIM4)
 	{
-		imu_sample_flag += 1; //Activamos la bandera para toma de datos del mpu
+			print_count++;
+
+			if(MPU9250_GetData(&imu) == HAL_OK)
+			{
+				MPU9250_Update(&imu, 0.005f);
+			}
+			  /*
+			  * CONTROL PID POSICION
+			  */
+
+			 e0 = (-4.60 /*+ u_vel*/) - imu.roll;
+			 delta_u = (q0*e0)+(q1*e1)+(q2*e2);
+			 u += delta_u;
+
+			 if(u >= 10.4)
+			 {
+			  u = 10.4;
+			 }
+			 if(u <= -10.4)
+			 {
+			  u = -10.4;
+			 }
+
+			 if((e0 >= -0.15)&&(e0 <= 0.15))
+			 {
+				 u = 0.0;
+			 }
+
+
+			 PWM = (fabs(u)/10.4)*1000.0;
+
+			 /*
+			 *  ASIGNACION DE PWM Y SENTIDO DE PINES
+			 */
+
+			 if(u >= 0.0)
+			 {
+
+			    HAL_GPIO_WritePin(GPIOA, R_Motor_Direction_2_Pin, 0);
+			    HAL_GPIO_WritePin(GPIOA, R_Motor_Direction_1_Pin, 1);
+
+			 	HAL_GPIO_WritePin(GPIOA, L_Motor_Direction_2_Pin, 0);
+			    HAL_GPIO_WritePin(GPIOA, L_Motor_Direction_1_Pin, 1);
+
+			 }
+			 if(u < 0.0){
+
+
+				 HAL_GPIO_WritePin(GPIOA, R_Motor_Direction_2_Pin, 1);
+				 HAL_GPIO_WritePin(GPIOA, R_Motor_Direction_1_Pin, 0);
+
+				 HAL_GPIO_WritePin(GPIOA, L_Motor_Direction_2_Pin, 1);
+				 HAL_GPIO_WritePin(GPIOA, L_Motor_Direction_1_Pin, 0);
+
+			 }
+
+			 e2 = e1;
+			 e1 = e0;
+
+			__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, PWM);
+			__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, PWM);
+
+			print_count += 1;
 
 	}
+
+	if(htim -> Instance == TIM9)
+	{
+		encoderR_count[0] = Leer_Encoder(&htim2);
+		encoderL_count[0] = Leer_Encoder(&htim5);
+
+		motorR_Rev[0] = (float)(((float)encoderR_count[0] - (float)encoderR_count[1])*60)/(PPR*ENCODERMOD*0.025);
+		motorL_Rev[0] = (float)(((float)encoderL_count[0] - (float)encoderL_count[1])*60)/(PPR*ENCODERMOD*0.025);
+
+		motors_filter[0] = (ALPHA_MOTORS*motorR_Rev[0])+(1.0 - ALPHA_MOTORS)*(motorR_Rev[1]);
+		motors_filter[1] = (ALPHA_MOTORS*motorL_Rev[0])+(1.0 - ALPHA_MOTORS)*(motorL_Rev[1]);
+
+		e0_vel = setpoint_vel - motors_filter[0];
+		delta_u_vel = (q0_vel*e0_vel)+(q1_vel*e1_vel)+(q2_vel*e2_vel);
+
+		u_vel = u_vel + delta_u_vel;
+
+		if(u_vel >= 5.0f)  u_vel = 5.0f;
+		if(u_vel <= -5.0f) u_vel = -5.0f;
+
+		motorR_Rev[1] = motors_filter[0];
+		motorL_Rev[1] = motors_filter[1];
+
+		encoderR_count[1] = encoderR_count[0];
+		encoderL_count[1] = encoderL_count[0];
+
+		e2_vel = e1_vel;
+		e1_vel = e0_vel;
+
+	}
+
 }
+
+	uint32_t Leer_Encoder(TIM_HandleTypeDef *htim){
+		return __HAL_TIM_GET_COUNTER(htim);
+	}
+
 
 /* USER CODE END 4 */
 
