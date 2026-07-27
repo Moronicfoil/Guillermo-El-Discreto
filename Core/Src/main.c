@@ -37,13 +37,13 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define KP 1.080f			// las mas chingonas 3.185 k y 0.012 de TD y 1000 TI  // otros mas buenos KP 3.185 T1 500.0 TD 0.016
-#define TI 1000.0f			//5.0f
-#define TD 0.0013f		// probar kp 1.5	// ultimos valores chidos 25 jul 3.183 KP, 100.0 KI, 0.011 TD
+#define KP 1.020f			// las mas chingonas 3.185 k y 0.012 de TD y 1000 TI  // otros mas buenos KP 3.185 T1 500.0 TD 0.016
+#define TI 1000.70f			//5.0f
+#define TD 0.0045f		// probar kp 1.5	// ultimos valores chidos 25 jul 3.183 KP, 100.0 KI, 0.011 TD
 #define T0 0.001f
-#define KPVEL 0.0012f
+#define KPVEL 0.110f
 #define TIVEL 1000.0f
-#define TDVEL 0.0f
+#define TDVEL 0.0017f			// Ti 0.70 t TD 0.013
 #define T0VEL 0.025f
 
 
@@ -294,13 +294,13 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
 
 			if(MPU9250_GetData(&imu) == HAL_OK)
 			{
-				MPU9250_Update(&imu, 0.005f);
+				MPU9250_Update(&imu, 0.001f);
 			}
 			  /*
 			  * CONTROL PID POSICION
 			  */
 
-			 e0 = (-4.60 /*+ u_vel*/) - imu.roll;
+			 e0 = (-4.60 /*+u_vel*/) - imu.roll;
 			 delta_u = (q0*e0)+(q1*e1)+(q2*e2);
 			 u += delta_u;
 

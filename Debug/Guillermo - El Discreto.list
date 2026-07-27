@@ -39,13 +39,13 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  17 .debug_line   00011442  00000000  00000000  000390e2  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_str    000929cb  00000000  00000000  0004a524  2**0
+ 18 .debug_str    000929ce  00000000  00000000  0004a524  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .comment      00000043  00000000  00000000  000dceef  2**0
+ 19 .comment      00000043  00000000  00000000  000dcef2  2**0
                   CONTENTS, READONLY
- 20 .debug_frame  00005684  00000000  00000000  000dcf34  2**2
+ 20 .debug_frame  00005684  00000000  00000000  000dcf38  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 21 .debug_line_str 00000068  00000000  00000000  000e25b8  2**0
+ 21 .debug_line_str 00000068  00000000  00000000  000e25bc  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -1928,7 +1928,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
  8001400:	2b00      	cmp	r3, #0
  8001402:	d104      	bne.n	800140e <HAL_TIM_PeriodElapsedCallback+0x36>
 			{
-				MPU9250_Update(&imu, 0.005f);
+				MPU9250_Update(&imu, 0.001f);
  8001404:	ed9f 0abb 	vldr	s0, [pc, #748]	@ 80016f4 <HAL_TIM_PeriodElapsedCallback+0x31c>
  8001408:	48b9      	ldr	r0, [pc, #740]	@ (80016f0 <HAL_TIM_PeriodElapsedCallback+0x318>)
  800140a:	f000 fcfb 	bl	8001e04 <MPU9250_Update>
@@ -1937,7 +1937,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
 			  * CONTROL PID POSICION
 			  */
 
-			 e0 = (-4.60 /*+ u_vel*/) - imu.roll;
+			 e0 = (-4.60 /*+u_vel*/) - imu.roll;
  800140e:	4bb8      	ldr	r3, [pc, #736]	@ (80016f0 <HAL_TIM_PeriodElapsedCallback+0x318>)
  8001410:	6c9b      	ldr	r3, [r3, #72]	@ 0x48
  8001412:	4618      	mov	r0, r3
@@ -2259,12 +2259,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
  80016e8:	40000800 	.word	0x40000800
  80016ec:	20000294 	.word	0x20000294
  80016f0:	200001f0 	.word	0x200001f0
- 80016f4:	3ba3d70a 	.word	0x3ba3d70a
+ 80016f4:	3a83126f 	.word	0x3a83126f
  80016f8:	2000023c 	.word	0x2000023c
- 80016fc:	401ef9dd 	.word	0x401ef9dd
- 8001700:	c078d4fc 	.word	0xc078d4fc
+ 80016fc:	40b3851e 	.word	0x40b3851e
+ 8001700:	c1233331 	.word	0xc1233331
  8001704:	20000240 	.word	0x20000240
- 8001708:	3fb3b646 	.word	0x3fb3b646
+ 8001708:	4092e146 	.word	0x4092e146
  800170c:	20000244 	.word	0x20000244
  8001710:	2000024c 	.word	0x2000024c
  8001714:	20000248 	.word	0x20000248
@@ -2447,10 +2447,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
  80018cc:	20000288 	.word	0x20000288
  80018d0:	20000290 	.word	0x20000290
  80018d4:	20000254 	.word	0x20000254
- 80018d8:	3a9d49d3 	.word	0x3a9d49d3
- 80018dc:	ba9d48d1 	.word	0xba9d48d1
+ 80018d8:	3df09a13 	.word	0x3df09a13
+ 80018dc:	bdffea4f 	.word	0xbdffea4f
  80018e0:	20000258 	.word	0x20000258
- 80018e4:	00000000 	.word	0x00000000
+ 80018e4:	3bf51ac9 	.word	0x3bf51ac9
  80018e8:	2000025c 	.word	0x2000025c
  80018ec:	20000264 	.word	0x20000264
  80018f0:	20000260 	.word	0x20000260
