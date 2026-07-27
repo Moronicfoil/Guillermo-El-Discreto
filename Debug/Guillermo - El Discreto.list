@@ -2577,8 +2577,8 @@ float Filtro_IIR_MPU(float Nueva_Entrada_X)
   float Suma_Salidas = 0.0f;
  80019d6:	f04f 0300 	mov.w	r3, #0
  80019da:	613b      	str	r3, [r7, #16]
-  for(int i = 0; i < Num_Coeficientes; i++)
- 80019dc:	2300      	movs	r3, #0
+  for(int i = 1; i < Num_Coeficientes; i++)
+ 80019dc:	2301      	movs	r3, #1
  80019de:	60fb      	str	r3, [r7, #12]
  80019e0:	e016      	b.n	8001a10 <Filtro_IIR_MPU+0xc8>
   {
@@ -2597,7 +2597,7 @@ float Filtro_IIR_MPU(float Nueva_Entrada_X)
  80019fe:	ed97 7a04 	vldr	s14, [r7, #16]
  8001a02:	ee77 7a27 	vadd.f32	s15, s14, s15
  8001a06:	edc7 7a04 	vstr	s15, [r7, #16]
-  for(int i = 0; i < Num_Coeficientes; i++)
+  for(int i = 1; i < Num_Coeficientes; i++)
  8001a0a:	68fb      	ldr	r3, [r7, #12]
  8001a0c:	3301      	adds	r3, #1
  8001a0e:	60fb      	str	r3, [r7, #12]

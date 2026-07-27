@@ -425,7 +425,7 @@ float Filtro_IIR_MPU(float Nueva_Entrada_X)
   }
 
   float Suma_Salidas = 0.0f;
-  for(int i = 0; i < Num_Coeficientes; i++)
+  for(int i = 1; i < Num_Coeficientes; i++)
   {
     Suma_Salidas += ROM_B[i] * RAM_Salida[i];
   }
