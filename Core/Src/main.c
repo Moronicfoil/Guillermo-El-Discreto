@@ -116,7 +116,7 @@ const float ROM_B[Num_Coeficientes] = {1.0f, -1.2578f, 0.4678f}; //Coeficientes 
 
 volatile float RAM_Entrada[Num_Coeficientes] = {0.0};
 volatile float RAM_Salida[Num_Coeficientes] = {0.0};
-volatile float angulo_filrado = 0.0f;
+volatile float angulo_filtrado = 0.0f;
 
 
 /* USER CODE END PV */
@@ -179,8 +179,8 @@ int main(void)
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
 
-  printf("hola");
-
+  //printf("hola");
+  printf("MPU_Original,MPU_Filtrado");
   //I2C_Scan(&hi2c2);
 
   //	Iniciamos el sensr
@@ -214,8 +214,9 @@ int main(void)
 		 if(print_count == 10)
 		 {
 		   print_count = 0;
-		   printf("Pitch: %.2f U: %.2f	MR: %.2f ML: %.2f\r\n" , (-4.60)-imu.roll, u,motors_filter[0], motors_filter[1] ); // antes - 7.10
+		  // printf("Pitch: %.2f U: %.2f	MR: %.2f ML: %.2f\r\n" , (-4.60)-imu.roll, u,motors_filter[0], motors_filter[1] ); // antes - 7.10
 		  // printf("R1=%d R2=%d L1=%d L2=%d\r\n",R_patita_1, R_patita_2, L_patita_1, L_patita_2);
+		   printf("%.2f,%.2f",imu.roll,angulo_filtrado);
 
 		 }
 
@@ -311,12 +312,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
 				MPU9250_Update(&imu, 0.001f);
 			}
 
-			angulo_filrado = Filtro_IIR_MPU(imu.roll); //
+			angulo_filtrado = Filtro_IIR_MPU(imu.roll); //
 			  /*
 			  * CONTROL PID POSICION
 			  */
 
-			 e0 = (-4.60 /*+u_vel*/) - angulo_filrado;
+			 e0 = (-4.60 /*+u_vel*/) - angulo_filtrado;
 			 delta_u = (q0*e0)+(q1*e1)+(q2*e2);
 			 u += delta_u;
 
