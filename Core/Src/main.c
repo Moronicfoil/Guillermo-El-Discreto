@@ -111,8 +111,8 @@ uint8_t print_count = 0;
 //Tipo de filtro: Pasa Bajas - Inverse Chebyshev -
 //Grado: 6
 // Frecuencia de corte: 100Hz
-const float ROM_A[Num_Coeficientes] = {0.0114f, -0.0148f, 0.0114f}; //Coeficientes que multiplican la entrada
-const float ROM_B[Num_Coeficientes] = {1.0f, -1.8709f, 0.8788f}; //Coeficientes que multiplican la salida
+const float ROM_A[Num_Coeficientes] = {0.0593f, 0.0914f, 0.0593f}; //Coeficientes que multiplican la entrada
+const float ROM_B[Num_Coeficientes] = {1.0f, -1.2578f, 0.4678f}; //Coeficientes que multiplican la salida
 
 volatile float RAM_Entrada[Num_Coeficientes] = {0.0};
 volatile float RAM_Salida[Num_Coeficientes] = {0.0};
