@@ -110,10 +110,11 @@ uint8_t print_count = 0;
 //Tipo de filtro: Pasa Bajas - Inverse Chebyshev -
 //Grado: 6
 // Frecuencia de corte: 100Hz
-float ROM_A[6] = {0.0131f, -0.0321f, 0.0496f, -0.0521f, 0.0131f, -0.0321f, 0.0496f}; //Coeficientes que multiplican la entrada
-float ROM_B[6] = {1.0f, -4.0776f, 7.1621f, -6.8726f, 3.7842f, -1.1299f, 0.1428f}; //Coeficientes que multiplican la salida
-volatile float RAM_Entrada[6] = {0.0};
-volatile float RAM_Salida[6] = {0.0};
+int Num_Coeficientes = 7;
+float ROM_A[Num_Coeficientes] = {0.0131f, -0.0321f, 0.0496f, -0.0521f, 0.0131f, -0.0321f, 0.0496f}; //Coeficientes que multiplican la entrada
+float ROM_B[Num_Coeficientes] = {1.0f, -4.0776f, 7.1621f, -6.8726f, 3.7842f, -1.1299f, 0.1428f}; //Coeficientes que multiplican la salida
+volatile float RAM_Entrada[7] = {0.0};
+volatile float RAM_Salida[7] = {0.0};
 volatile float angulo_filrado = 0.0f;
 
 
@@ -126,6 +127,7 @@ static void MX_NVIC_Init(void);
 int uart2_write(int ch);
 int __io_putchar(int ch);
 uint32_t Leer_Encoder(TIM_HandleTypeDef *htim);
+void Filtro_IIR_MPU(float);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -407,7 +409,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
 
 void Filtro_IIR_MPU(float Nueva_Entrada_X)
 {
-  for(int i = 6; i > 0; i--)
+  for(int i = Num_Coeficientes - 1; i > 0; i--)
   {
     RAM_Entrada[i] = RAM_Entrada[i - 1];
     RAM_Salida[i] = RAM_Salida[i - 1];
@@ -416,15 +418,15 @@ void Filtro_IIR_MPU(float Nueva_Entrada_X)
   RAM_Entrada[0] = Nueva_Entrada_X;
 
   float Suma_Entradas = 0.0f;
-  for(int i = 0; i < 6; i++)
+  for(int i = 0; i < Num_Coeficientes; i++)
   {
-    Suma_Entradas = ROM_A[i] * RAM_Entrada[i];
+    Suma_Entradas += ROM_A[i] * RAM_Entrada[i];
   }
 
   float Suma_Salidas = 0.0f;
-  for(int i = 0; i < 6; i++)
+  for(int i = 0; i < Num_Coeficientes; i++)
   {
-    Suma_Salidas = ROM_B[i] * RAM_Salida[i];
+    Suma_Salidas += ROM_B[i] * RAM_Salida[i];
   }
   RAM_Salida[0] = Suma_Entradas - Suma_Salidas;
 
