@@ -28,7 +28,7 @@
 #include "stdio.h"
 #include "math.h"
 #include "mpu9250.h"
-#define Num_Coeficientes 7
+#define Num_Coeficientes 3
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -111,11 +111,11 @@ uint8_t print_count = 0;
 //Tipo de filtro: Pasa Bajas - Inverse Chebyshev -
 //Grado: 6
 // Frecuencia de corte: 100Hz
-const float ROM_A[Num_Coeficientes] = {0.0131,-0.0321,0.0496,-0.0521,0.0131,-0.0321,0.0496}; //Coeficientes que multiplican la entrada
-const float ROM_B[Num_Coeficientes] = {1.0f,-4.0776f,7.1621f,-6.8726f,3.7842f,-1.1299f,0.1428f}; //Coeficientes que multiplican la salida
+const float ROM_A[Num_Coeficientes] = {0.0114f, -0.0148f, 0.0114f}; //Coeficientes que multiplican la entrada
+const float ROM_B[Num_Coeficientes] = {1.0f, -1.8709f, 0.8788f}; //Coeficientes que multiplican la salida
 
-volatile float RAM_Entrada[7] = {0.0};
-volatile float RAM_Salida[7] = {0.0};
+volatile float RAM_Entrada[Num_Coeficientes] = {0.0};
+volatile float RAM_Salida[Num_Coeficientes] = {0.0};
 volatile float angulo_filrado = 0.0f;
 
 
