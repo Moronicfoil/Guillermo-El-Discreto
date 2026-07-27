@@ -28,6 +28,7 @@
 #include "stdio.h"
 #include "math.h"
 #include "mpu9250.h"
+#define Num_Coeficientes 7
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -110,9 +111,9 @@ uint8_t print_count = 0;
 //Tipo de filtro: Pasa Bajas - Inverse Chebyshev -
 //Grado: 6
 // Frecuencia de corte: 100Hz
-int Num_Coeficientes = 7;
-float ROM_A[Num_Coeficientes] = {0.0131f, -0.0321f, 0.0496f, -0.0521f, 0.0131f, -0.0321f, 0.0496f}; //Coeficientes que multiplican la entrada
-float ROM_B[Num_Coeficientes] = {1.0f, -4.0776f, 7.1621f, -6.8726f, 3.7842f, -1.1299f, 0.1428f}; //Coeficientes que multiplican la salida
+const float ROM_A[Num_Coeficientes] = {0.0131,-0.0321,0.0496,-0.0521,0.0131,-0.0321,0.0496}; //Coeficientes que multiplican la entrada
+const float ROM_B[Num_Coeficientes] = {1.0f,-4.0776f,7.1621f,-6.8726f,3.7842f,-1.1299f,0.1428f}; //Coeficientes que multiplican la salida
+
 volatile float RAM_Entrada[7] = {0.0};
 volatile float RAM_Salida[7] = {0.0};
 volatile float angulo_filrado = 0.0f;
@@ -127,7 +128,7 @@ static void MX_NVIC_Init(void);
 int uart2_write(int ch);
 int __io_putchar(int ch);
 uint32_t Leer_Encoder(TIM_HandleTypeDef *htim);
-void Filtro_IIR_MPU(float);
+float Filtro_IIR_MPU(float);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -310,7 +311,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
 				MPU9250_Update(&imu, 0.001f);
 			}
 
-      angulo_filrado = Filtro_IIR_MPU(imu.roll); //
+			angulo_filrado = Filtro_IIR_MPU(imu.roll); //
 			  /*
 			  * CONTROL PID POSICION
 			  */
@@ -407,7 +408,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
 		return __HAL_TIM_GET_COUNTER(htim);
 	}
 
-void Filtro_IIR_MPU(float Nueva_Entrada_X)
+float Filtro_IIR_MPU(float Nueva_Entrada_X)
 {
   for(int i = Num_Coeficientes - 1; i > 0; i--)
   {
