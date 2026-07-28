@@ -119,6 +119,8 @@ volatile float RAM_Salida[Num_Coeficientes] = {0.0};
 volatile float angulo_filtrado = 0.0f;
 
 
+
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -179,8 +181,8 @@ int main(void)
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
 
-  //printf("hola");
-  printf("MPU_Original,MPU_Filtrado");
+  printf("hola");
+  //printf("MPU_Original,MPU_Filtrado,Tiempo");
   //I2C_Scan(&hi2c2);
 
   //	Iniciamos el sensr
@@ -208,15 +210,17 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  float t = 0.0f;
   while (1)
   {
 
 		 if(print_count == 10)
 		 {
 		   print_count = 0;
-		  // printf("Pitch: %.2f U: %.2f	MR: %.2f ML: %.2f\r\n" , (-4.60)-imu.roll, u,motors_filter[0], motors_filter[1] ); // antes - 7.10
+		   t += 0.01;
+		  printf("Pitch: %.2f U: %.2f	MR: %.2f ML: %.2f\r\n" , (-4.60)-imu.roll, u,motors_filter[0], motors_filter[1] ); // antes - 7.10
 		  // printf("R1=%d R2=%d L1=%d L2=%d\r\n",R_patita_1, R_patita_2, L_patita_1, L_patita_2);
-		   printf("%.2f,%.2f",imu.roll,angulo_filtrado);
+		  // printf("%.2f,%.2f,%.2f\n",imu.roll,angulo_filtrado,t);
 
 		 }
 
