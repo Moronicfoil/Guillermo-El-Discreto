@@ -38,9 +38,9 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define KP 1.1080f			// las mas chingonas 3.185 k y 0.012 de TD y 1000 TI  // otros mas buenos KP 3.185 T1 500.0 TD 0.016
-#define TI 1000.70f			//5.0f
-#define TD 0.00011f		// probar kp 1.5	// ultimos valores chidos 25 jul 3.183 KP, 100.0 KI, 0.011 TD
+#define KP 0.914f			// valores funcionales hasta ahora KP 0.951 T1 1000.70 TD 0.0025
+#define TI 0.70f			//5.0f
+#define TD 0.0025f		// probar kp 1.5	// ultimos valores chidos 28 jul 0.916 KP, 100.70 KI, 0.0025 TD
 //Limite inferior: 0.0001f
 //Limite superior: 0.00014f
 #define T0 0.001f
@@ -53,6 +53,9 @@
 #define PPR 318.0f
 #define ALPHA_MOTORS 0.1666f
 #define ENCODERMOD 4.0f
+
+#define PWM_DEADBAND 200.0f
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -74,8 +77,8 @@ volatile float e2 = 0.0f;
 volatile float u = 0.0f;
 volatile float delta_u = 0;
 
-
-volatile float PWM = 0;
+volatile float PWM_raw = 0.0;
+volatile float PWM = 0.0;
 volatile float u_temp = 0;
 
 
@@ -183,7 +186,7 @@ int main(void)
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
 
-  printf("hola");
+  //printf("hola");
   //printf("MPU_Original,MPU_Filtrado,Tiempo");
   //I2C_Scan(&hi2c2);
 
@@ -220,7 +223,7 @@ int main(void)
 		 {
 		   print_count = 0;
 		   t += 0.01;
-		  printf("Pitch: %.2f U: %.2f	MR: %.2f ML: %.2f\r\n" , (-4.60)-imu.roll, u,motors_filter[0], motors_filter[1] ); // antes - 7.10
+		  printf("Pitch: %.2f U: %.2f	MR: %.2f ML: %.2f\r\n" , imu.roll, u,motors_filter[0], motors_filter[1] ); // antes - 7.10
 		  // printf("R1=%d R2=%d L1=%d L2=%d\r\n",R_patita_1, R_patita_2, L_patita_1, L_patita_2);
 		  // printf("%.2f,%.2f,%.2f\n",imu.roll,angulo_filtrado,t);
 
@@ -325,7 +328,11 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
 
 			 e0 = (-4.60 /*+u_vel*/) - angulo_filtrado;
 			 delta_u = (q0*e0)+(q1*e1)+(q2*e2);
-			 u += delta_u;
+
+			 float u_temp = u + delta_u;
+
+			 if(u_temp < 10.4f && u_temp > -10.4f)
+			     u = u_temp;
 
 			 if(u >= 10.4)
 			 {
@@ -342,7 +349,17 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
 			 }
 
 
-			 PWM = (fabs(u)/10.4)*1000.0;
+
+			 PWM_raw = (fabs(u)/10.4f)*1000.0f;
+
+			 if(PWM_raw > 0.0f)
+			 {
+			     PWM = PWM_DEADBAND + (PWM_raw * (1000.0f - PWM_DEADBAND) / 1000.0f);
+			 }
+			 else
+			 {
+			     PWM = 0.0f;
+			 }
 
 			 /*
 			 *  ASIGNACION DE PWM Y SENTIDO DE PINES
