@@ -38,9 +38,11 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define KP 1.020f			// las mas chingonas 3.185 k y 0.012 de TD y 1000 TI  // otros mas buenos KP 3.185 T1 500.0 TD 0.016
+#define KP 1.1080f			// las mas chingonas 3.185 k y 0.012 de TD y 1000 TI  // otros mas buenos KP 3.185 T1 500.0 TD 0.016
 #define TI 1000.70f			//5.0f
-#define TD 0.0045f		// probar kp 1.5	// ultimos valores chidos 25 jul 3.183 KP, 100.0 KI, 0.011 TD
+#define TD 0.00011f		// probar kp 1.5	// ultimos valores chidos 25 jul 3.183 KP, 100.0 KI, 0.011 TD
+//Limite inferior: 0.0001f
+//Limite superior: 0.00014f
 #define T0 0.001f
 #define KPVEL 0.110f
 #define TIVEL 1000.0f

@@ -39,13 +39,13 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  17 .debug_line   000123ed  00000000  00000000  0003923c  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_str    000929cb  00000000  00000000  0004b629  2**0
+ 18 .debug_str    000929cd  00000000  00000000  0004b629  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .comment      00000043  00000000  00000000  000ddff4  2**0
+ 19 .comment      00000043  00000000  00000000  000ddff6  2**0
                   CONTENTS, READONLY
- 20 .debug_frame  00005434  00000000  00000000  000de038  2**2
+ 20 .debug_frame  00005434  00000000  00000000  000de03c  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 21 .debug_line_str 00000067  00000000  00000000  000e346c  2**0
+ 21 .debug_line_str 00000067  00000000  00000000  000e3470  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -2283,10 +2283,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
  8001724:	3a83126f 	.word	0x3a83126f
  8001728:	200002b0 	.word	0x200002b0
  800172c:	2000023c 	.word	0x2000023c
- 8001730:	40b3851e 	.word	0x40b3851e
- 8001734:	c1233331 	.word	0xc1233331
+ 8001730:	3f9d6cba 	.word	0x3f9d6cba
+ 8001734:	bfad0675 	.word	0xbfad0675
  8001738:	20000240 	.word	0x20000240
- 800173c:	4092e146 	.word	0x4092e146
+ 800173c:	3df99c38 	.word	0x3df99c38
  8001740:	20000244 	.word	0x20000244
  8001744:	2000024c 	.word	0x2000024c
  8001748:	20000248 	.word	0x20000248
