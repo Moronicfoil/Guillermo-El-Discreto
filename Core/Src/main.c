@@ -38,10 +38,10 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define KP 0.914f			// valores funcionales hasta ahora KP 0.951 T1 1000.70 TD 0.0025
-#define TI 0.70f			//5.0f
-#define TD 0.0025f		// probar kp 1.5	// ultimos valores chidos 28 jul 0.916 KP, 100.70 KI, 0.0025 TD
-//Limite inferior: 0.0001f
+#define KP 0.970f			// valores funcionales hasta ahora KP 0.951 T1 1000.70 TD 0.0025   //con 0.980 se vuelve inestable
+#define TI 0.34f			//5.0f
+#define TD 0.0054f		// probar kp 1.5	// ultimos valores chidos 28 jul 0.916 KP, 100.70 KI, 0.0025 TD
+//Limite inferior: 0.0001f					// mejores valores kP 0.970 TI 0.24 TD 0.0055
 //Limite superior: 0.00014f
 #define T0 0.001f
 #define KPVEL 0.110f
@@ -49,6 +49,8 @@
 #define TDVEL 0.0017f			// Ti 0.70 t TD 0.013
 #define T0VEL 0.025f
 
+#define MOTOR_R_SCALE 1.00f
+#define MOTOR_L_SCALE 1.060f
 
 #define PPR 318.0f
 #define ALPHA_MOTORS 0.1666f
@@ -215,15 +217,13 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  float t = 0.0f;
   while (1)
   {
 
 		 if(print_count == 10)
 		 {
 		   print_count = 0;
-		   t += 0.01;
-		  printf("Pitch: %.2f U: %.2f	MR: %.2f ML: %.2f\r\n" , imu.roll, u,motors_filter[0], motors_filter[1] ); // antes - 7.10
+		   printf("Pitch: %.2f U: %.2f	MR: %.2f ML: %.2f\r\n" , imu.roll, u,motors_filter[0], motors_filter[1] ); // antes - 7.10
 		  // printf("R1=%d R2=%d L1=%d L2=%d\r\n",R_patita_1, R_patita_2, L_patita_1, L_patita_2);
 		  // printf("%.2f,%.2f,%.2f\n",imu.roll,angulo_filtrado,t);
 
@@ -343,7 +343,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
 			  u = -10.4;
 			 }
 
-			 if((e0 >= -0.15)&&(e0 <= 0.15))
+			 if((e0 >= -0.20)&&(e0 <= 0.20))
 			 {
 				 u = 0.0;
 			 }
@@ -364,6 +364,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
 			 /*
 			 *  ASIGNACION DE PWM Y SENTIDO DE PINES
 			 */
+
+			 float PWM_R = PWM * MOTOR_R_SCALE;
+			 float PWM_L = PWM * MOTOR_L_SCALE;
+
+			 if(PWM_R > 1000.0f) PWM_R = 1000.0f;
+			 if(PWM_L > 1000.0f) PWM_L = 1000.0f;
 
 			 if(u >= 0.0)
 			 {
@@ -389,8 +395,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
 			 e2 = e1;
 			 e1 = e0;
 
-			__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, PWM);
-			__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, PWM);
+			 __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, PWM_R);
+			 __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, PWM_L);
 
 			print_count += 1;
 
