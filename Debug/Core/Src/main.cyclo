@@ -1,9 +1,9 @@
 ../Core/Src/main.c:152:5:main	3
-../Core/Src/main.c:244:6:SystemClock_Config	3
-../Core/Src/main.c:289:13:MX_NVIC_Init	1
-../Core/Src/main.c:300:5:uart2_write	2
-../Core/Src/main.c:307:5:__io_putchar	1
-../Core/Src/main.c:313:6:HAL_TIM_PeriodElapsedCallback	17
-../Core/Src/main.c:437:11:Leer_Encoder	1
-../Core/Src/main.c:441:7:Filtro_IIR_MPU	4
-../Core/Src/main.c:473:6:Error_Handler	1
+../Core/Src/main.c:246:6:SystemClock_Config	3
+../Core/Src/main.c:291:13:MX_NVIC_Init	1
+../Core/Src/main.c:302:5:uart2_write	2
+../Core/Src/main.c:309:5:__io_putchar	1
+../Core/Src/main.c:315:6:HAL_TIM_PeriodElapsedCallback	19
+../Core/Src/main.c:444:11:Leer_Encoder	1
+../Core/Src/main.c:448:7:Filtro_IIR_MPU	4
+../Core/Src/main.c:480:6:Error_Handler	1

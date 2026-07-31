@@ -40,14 +40,14 @@
 /* USER CODE BEGIN PD */
 #define KP 0.970f			// valores funcionales hasta ahora KP 0.951 T1 1000.70 TD 0.0025   //con 0.980 se vuelve inestable
 #define TI 0.34f			//5.0f
-#define TD 0.0054f		// probar kp 1.5	// ultimos valores chidos 28 jul 0.916 KP, 100.70 KI, 0.0025 TD
+#define TD 0.0050f	// probar kp 1.5	// ultimos valores chidos 28 jul 0.916 KP, 100.70 KI, 0.0025 TD
 //Limite inferior: 0.0001f					// mejores valores kP 0.970 TI 0.24 TD 0.0055
 //Limite superior: 0.00014f
 #define T0 0.001f
-#define KPVEL 0.110f
+#define KPVEL 0.150f
 #define TIVEL 1000.0f
-#define TDVEL 0.0017f			// Ti 0.70 t TD 0.013
-#define T0VEL 0.025f
+#define TDVEL 0.00f			// Ti 0.70 t TD 0.013
+#define T0VEL 0.010f
 
 #define MOTOR_R_SCALE 1.00f
 #define MOTOR_L_SCALE 1.060f
@@ -109,7 +109,7 @@ volatile float motorR_Rev[2] = {0.0, 0.0};
 
 volatile float motors_filter[2] = {0.0, 0.0};
 
-volatile float setpoint_vel = 0.0f;
+volatile float setpoint_vel = 1.0f;
 
 
 uint8_t print_count = 0;
@@ -126,7 +126,7 @@ volatile float RAM_Salida[Num_Coeficientes] = {0.0};
 volatile float angulo_filtrado = 0.0f;
 
 
-
+float temp = 0.0;
 
 /* USER CODE END PV */
 
@@ -189,7 +189,7 @@ int main(void)
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
 
   //printf("hola");
-  //printf("MPU_Original,MPU_Filtrado,Tiempo");
+  printf("vel set,Uv,tiempo");
   //I2C_Scan(&hi2c2);
 
   //	Iniciamos el sensr
@@ -220,11 +220,13 @@ int main(void)
   while (1)
   {
 
+
 		 if(print_count == 10)
 		 {
+
 		   print_count = 0;
-		   printf("Pitch: %.2f U: %.2f	MR: %.2f ML: %.2f\r\n" , imu.roll, u,motors_filter[0], motors_filter[1] ); // antes - 7.10
-		  // printf("R1=%d R2=%d L1=%d L2=%d\r\n",R_patita_1, R_patita_2, L_patita_1, L_patita_2);
+		  //printf("Pitch: %.2f U: %.2f	MR: %.2f ML: %.2f\r\n" , imu.roll, u,motors_filter[0], motors_filter[1] ); // antes - 7.10
+		   printf("%.2f, %.2f, %.2f \r\n",setpoint_vel,u_vel, temp );
 		  // printf("%.2f,%.2f,%.2f\n",imu.roll,angulo_filtrado,t);
 
 		 }
@@ -326,7 +328,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
 			  * CONTROL PID POSICION
 			  */
 
-			 e0 = (-4.60 /*+u_vel*/) - angulo_filtrado;
+			 e0 = (-4.60 +u_vel) - angulo_filtrado;
 			 delta_u = (q0*e0)+(q1*e1)+(q2*e2);
 
 			 float u_temp = u + delta_u;
@@ -399,6 +401,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
 			 __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, PWM_L);
 
 			print_count += 1;
+			 temp += 0.001;
 
 	}
 
@@ -407,19 +410,23 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
 		encoderR_count[0] = Leer_Encoder(&htim2);
 		encoderL_count[0] = Leer_Encoder(&htim5);
 
-		motorR_Rev[0] = (float)(((float)encoderR_count[0] - (float)encoderR_count[1])*60)/(PPR*ENCODERMOD*0.025);
-		motorL_Rev[0] = (float)(((float)encoderL_count[0] - (float)encoderL_count[1])*60)/(PPR*ENCODERMOD*0.025);
+		motorR_Rev[0] = (float)(((float)encoderR_count[0] - (float)encoderR_count[1])*60)/(PPR*ENCODERMOD*0.010);
+		motorL_Rev[0] = (float)(((float)encoderL_count[0] - (float)encoderL_count[1])*60)/(PPR*ENCODERMOD*0.010);
 
 		motors_filter[0] = (ALPHA_MOTORS*motorR_Rev[0])+(1.0 - ALPHA_MOTORS)*(motorR_Rev[1]);
 		motors_filter[1] = (ALPHA_MOTORS*motorL_Rev[0])+(1.0 - ALPHA_MOTORS)*(motorL_Rev[1]);
 
-		e0_vel = setpoint_vel - motors_filter[0];
+		float prom = (motors_filter[0] + motors_filter[1])/2.0;
+
+		e0_vel = setpoint_vel - prom;
 		delta_u_vel = (q0_vel*e0_vel)+(q1_vel*e1_vel)+(q2_vel*e2_vel);
 
-		u_vel = u_vel + delta_u_vel;
+		float u_vel_temp = u_vel + delta_u_vel;
+		if(u_vel_temp < 1.0f && u_vel_temp > -1.0f)
+		    u_vel = u_vel_temp;
 
-		if(u_vel >= 5.0f)  u_vel = 5.0f;
-		if(u_vel <= -5.0f) u_vel = -5.0f;
+		if(u_vel >= 1.0f)  u_vel = 1.0f;
+		if(u_vel <= -1.0f) u_vel = -1.0f;
 
 		motorR_Rev[1] = motors_filter[0];
 		motorL_Rev[1] = motors_filter[1];
